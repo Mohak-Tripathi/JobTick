@@ -130,7 +130,7 @@ exports.getJob = async function (req, res, next) {
   //You can find jobs by ID only as ID is always unique.
 };
 
-//Get statistics about a topic(job) => /api/v1/stats/:topic
+//Get statistics about a topic/title(job) => /api/v1/stats/:topic  => topic here means title only
 
 exports.jobStats = async (req, res, next) => {
   const stats = await Job.aggregate([
@@ -139,9 +139,19 @@ exports.jobStats = async (req, res, next) => {
       $match: { $text: { $search: '"' + req.params.topic + '"' } },
     },
     {
+      // this is critical so we are grouping on the basis of id- => id is very important=> if id is null=> then it will finad totalJobs, avgPosition, min, max salary etc of all the documents mentioned but if you put the criteria as well in "_id"- so it will create different groups as well.
+      // so "No experience" data with all these key points (min and max salary etc). Similarly -> 2-5 years ka and 5+ years ka as well. "
+      
+      // You also need to run "createIndex command in mongoShell"
+      //db.jobs.createIndex({title : "text"}) - otherwise it won't work
+      
       $group: {
-        _id: null, //syntax
-        avgSalary: { $avg: "$salary" },
+        _id: { $toUpper: `$experience` }, //syntax
+        totalJobs: { $sum: 1 },
+        avgPosition: { $avg: `$positions` },
+        avgSalary: { $avg: `$salary` },
+        minSalary: { $min: `$salary` },
+        maxSalary: { $max: `$salary` },
       },
       // basically match ex- Node developer and then group then and find their salary
     },
