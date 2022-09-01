@@ -2,6 +2,8 @@ const Job = require("../models/jobs");
 
 const geoCoder = require("../utils/geocoder");
 
+const ErrorHandler = require("../utils/errorHandler")
+
 //GET ALL JOBS=> /api/v1/jobs
 exports.getJobs = async (req, res, next) => {
   const jobs = await Job.find({}).lean().exec();
@@ -58,10 +60,13 @@ exports.updateJob = async (req, res, next) => {
   //You can simply when you update job rather than using findByIdAndUpdate you can use job.save(). This will automatically call the pre-save method and generate the slug.
 
   if (!job) {
-    return res.status(404).json({
-      success: false,
-      message: "Job not Found",
-    });
+
+    // return res.status(404).json({
+    //   success: false,
+    //   message: "Job not Found",
+    // });
+
+    return next(new ErrorHandler("Job not found", 404));
   }
 
   job = await Job.findByIdAndUpdate(req.params.id, req.body, {
