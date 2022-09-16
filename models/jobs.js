@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const slugify = require("slugify");
+
 const geoCoder= require("../utils/geocoder")
 
 
@@ -116,7 +117,7 @@ const jobSchema = new mongoose.Schema(
       default: new Date().setDate(new Date().getDate() + 7),
     },
 
-    //we also want to store the applications applied. We will store their id and resume of thos applications.
+    //we also want to store the applications applied. We will store their id and resume of those applications.
     applicationsApplied: {
       type: [Object], // Object because we want to store id and resume.
       select: false, // esse normal users can't see this

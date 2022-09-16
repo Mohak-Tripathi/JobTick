@@ -50,15 +50,13 @@ exports.updateJob = async (req, res, next) => {
   // When sending wrong id to check- Don't reduce its size- Id size must be 24 characters.
 
   // Que- When I give try to update title of job , Slug is not get updated . Could you please check ?
-
   // For Example if I updated title from ( Node Developer ) to ( Nest Developer ) then I want to expect a result of slug ( nest-developer )
-
   //Ans-   The reason is that we have used pre-save in the model. There can be multiple solutions:
 
   //You can define another method in model with pre (update) OR
-
   //You can simply when you update job rather than using findByIdAndUpdate you can use job.save(). This will automatically call the pre-save method and generate the slug.
 
+  // So basically learn how mongoose middleware work. 
   if (!job) {
 
     // return res.status(404).json({
@@ -111,7 +109,7 @@ exports.getJob = async function (req, res, next) {
   // Earlier line is not proper as we need "id" and "slug" both so -----
 
   let job = await Job.find({
-    $and: [{ _id: req.params.id }, { slug: req.params.slug }],
+    $and: [{ _id: req.params.id }, { slug: req.params.slug }]
   });
 
   if (!job || job.length === 0) {
@@ -190,7 +188,7 @@ exports.getJobsInRadius = async (req, res, next) => {
   const radius = distance / 3963; // 3963 will radius of earth
 
   //Specific MongoDB query -
-
+//Search in your Database. centerSphere is inbuilt operator. 
   const jobs = await Job.find({
     location: {
       $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
