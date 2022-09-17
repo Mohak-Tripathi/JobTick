@@ -9,7 +9,7 @@ const jobSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Please enter Jon Title"],
+      required: [true, "Please enter Job Title"],
       trim: true, // remove blank spaces
       maxlength: [100, "Job title cannot exceed 100 characters"],
     },

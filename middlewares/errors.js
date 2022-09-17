@@ -1,5 +1,6 @@
 module.exports = (err, req, res, next) => {
   // 4 parameters
+// console.log(err, "errmesagetocheck")
 
   err.statusCode = err.statusCode || 500; // if "user" provide statusCode then take that one, otherwise 500
 
@@ -13,13 +14,13 @@ module.exports = (err, req, res, next) => {
     });
   }
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV ==="production ") {      //remember there is a "space" after production 
     let error = { ...err }; //creating copy of error;
 
     error.message = err.message;
 
     return res.status(err.statusCode).json({
-      message: false,
+      success: false,
       message: error.message || "Internal Server Error",
     });
   }

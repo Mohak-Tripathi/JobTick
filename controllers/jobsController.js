@@ -3,9 +3,10 @@ const Job = require("../models/jobs");
 const geoCoder = require("../utils/geocoder");
 
 const ErrorHandler = require("../utils/errorHandler")
+const catchAsyncErrors = require("../middlewares/catchAsyncErrors")
 
 //GET ALL JOBS=> /api/v1/jobs
-exports.getJobs = async (req, res, next) => {
+exports.getJobs = catchAsyncErrors( async (req, res, next) => {
   const jobs = await Job.find({}).lean().exec();
 
   res.status(200).json({
@@ -22,12 +23,12 @@ exports.getJobs = async (req, res, next) => {
     data: jobs,
   });
   //   next()
-};
+});
 
 //Create a new Job => /api/v1/job/new
 // User must be authenticated and must be employer  (Later we will do)
 
-exports.newJob = async (req, res, next) => {
+exports.newJob = catchAsyncErrors( async (req, res, next) => {
   //   console.log(req.body);
 
   const job = await Job.create(req.body);
@@ -39,11 +40,11 @@ exports.newJob = async (req, res, next) => {
   });
 
   // here we are supposed to use try catch or ".then or .catch" as we dealing with "promises", but we will take care the same while dealing with "global error handling"
-};
+});
 
 //UPDATE NEW jOB => /api/v1/job/:id;
 
-exports.updateJob = async (req, res, next) => {
+exports.updateJob =  catchAsyncErrors( async (req, res, next) => {
   let job = await Job.findById(req.params.id);
 
   // Better Error handling later.
@@ -77,12 +78,12 @@ exports.updateJob = async (req, res, next) => {
     message: "Job has been updated",
     data: job,
   });
-};
+});
 
 //Delete a Job= > /api/v1/job/:id;
 
 //Someone asked good question- Chapter 37 - Regarding job update
-exports.deleteJob = async (req, res, next) => {
+exports.deleteJob = catchAsyncErrors(  async (req, res, next) => {
   let job = await Job.findById(req.params.id);
 
   if (!job) {
@@ -100,11 +101,11 @@ exports.deleteJob = async (req, res, next) => {
     success: true,
     message: "Jobs deleted suceesfully",
   });
-};
+});
 
 // Get a single job with id and slug => /api/v1/job/:id/:slug
 
-exports.getJob = async function (req, res, next) {
+exports.getJob = catchAsyncErrors( async function (req, res, next) {
   //   let job = await Job.findById(req.params.id);
   // Earlier line is not proper as we need "id" and "slug" both so -----
 
@@ -131,11 +132,11 @@ exports.getJob = async function (req, res, next) {
   //You can use only ID I'd you want.
   //I have used slug to show how to make slug and use that.
   //You can find jobs by ID only as ID is always unique.
-};
+});
 
 //Get statistics about a topic/title(job) => /api/v1/stats/:topic  => topic here means title only
 
-exports.jobStats = async (req, res, next) => {
+exports.jobStats =   catchAsyncErrors(   async (req, res, next) => {
   const stats = await Job.aggregate([
     {
       //syntax-- so match -> what ? => text => but How? => through search
@@ -171,11 +172,11 @@ exports.jobStats = async (req, res, next) => {
     success: true,
     data: stats,
   });
-};
+});
 
 //Search jobs with radius => /api/v1/jobs/:zipcode/:distance
 
-exports.getJobsInRadius = async (req, res, next) => {
+exports.getJobsInRadius =  catchAsyncErrors(  async (req, res, next) => {
   const { zipcode, distance } = req.params;
 
   // geocoder will provide latitude and longitude from zipcode => So import geocoder
@@ -200,4 +201,4 @@ exports.getJobsInRadius = async (req, res, next) => {
     results: jobs.length,
     data: jobs,
   });
-};
+});

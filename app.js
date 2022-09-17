@@ -50,7 +50,7 @@ const jobs = require("./routes/jobs");
 app.use("/api/v1", jobs);
 
 //Middleware to handle errors- --------
-
+// this middleware should be at the bottom.
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
