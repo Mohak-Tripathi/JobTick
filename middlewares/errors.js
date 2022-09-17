@@ -3,7 +3,7 @@ module.exports = (err, req, res, next) => {
 
   err.statusCode = err.statusCode || 500; // if "user" provide statusCode then take that one, otherwise 500
 
-  // in development mode, we need to see details of the error but in production, we have to send simple error message like job not found or please enter valid email => So we are dealing diffwerently.
+  // In THE development mode, we need to see details of the error but in production, we have to send simple error message like job not found or please enter valid email => So we are dealing diffwerently.
   if (process.env.NODE_ENV === "development") {
     res.status(err.statusCode).json({
       success: false,
