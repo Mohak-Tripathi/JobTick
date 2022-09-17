@@ -3,14 +3,20 @@ const app = express();
 
 const dotenv = require("dotenv");
 const connectDataBase = require("./config/database")
-
 const errorMiddleware = require("./middlewares/errors")
+const ErrorHandler = require("./utils/errorHandler")
+
 
 //setting config environemnt file variable-
 dotenv.config({ path: "./config/config.env" });
 
 
+
 //Handling Uncaught Exceptions 
+// Important to put it at the top as much as possible. 
+
+//console.log(kdsdlskdslkdls)  -- this is uncaught exception. So if this comes before. Then we can't catch but if comes after then we can so put as above as possible. 
+
 process.on("uncaughtException", err =>{
   console.log(`ERROR: ${err.message}`);
   console.log(`Shutting down due to uncaught exception`);
@@ -57,6 +63,16 @@ const jobs = require("./routes/jobs");
 
 app.use("/api/v1", jobs);
 
+
+//Handle Unhandled Routes. 
+//Note => Important to write this after all routes becz=> 
+//Here, .all = represent all method (GET, POST etc) and "*" represent all routes, so 
+// if you put this before all routes, in all time only this API (methos + route) will be called. 
+
+app.all("*", function(req, res, next){
+  next( new ErrorHandler(`${req.originalUrl} route not found`, 404))
+})
+
 //Middleware to handle errors- --------
 // this middleware should be at the bottom.
 app.use(errorMiddleware);
@@ -81,3 +97,5 @@ process.on("unhandledRejection", err =>{
     process.exit(1);
   })
 })
+
+
