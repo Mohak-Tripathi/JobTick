@@ -73,6 +73,7 @@ app.all("*", function(req, res, next){
   next( new ErrorHandler(`${req.originalUrl} route not found`, 404))
 })
 
+
 //Middleware to handle errors- --------
 // this middleware should be at the bottom.
 app.use(errorMiddleware);

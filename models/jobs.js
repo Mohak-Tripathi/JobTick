@@ -56,7 +56,7 @@ const jobSchema = new mongoose.Schema(
     },
     industry: {
       type: [String], //Array of values
-      required: true,
+      required: [true, "Please enter industry for this job"],
       enum: {
         values: [
           "Business",
@@ -72,7 +72,7 @@ const jobSchema = new mongoose.Schema(
     jobType: {
       type: String, // Why here not array of String. Reason is "industry" can operate in different sectors for example- Banking and Business but
       //jobTypes can be one type only- Permanent, temporary or internship
-      required: true,
+      required: [true, "Please enter the jobType"], 
       enum: {
         values: ["Permanent", "Temporary", "Internship"],
         message: "Please select correct options for job type.",
@@ -80,7 +80,7 @@ const jobSchema = new mongoose.Schema(
     },
     minEducation: {
       type: String,
-      required: true,
+      required: [true, "Please enter the minimum Education"],
       enum: {
         values: ["Bachelors", "Masters", "Phd"],
         message: "Please select correct options for minimum Education",
@@ -92,7 +92,7 @@ const jobSchema = new mongoose.Schema(
     },
     experience: {
       type: String,
-      required: true,
+      required: [true, "Please enter the number of experience required"],
       enum: {
         values: [
           "No Experience",
