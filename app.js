@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 
+const cookieParser = require("cookie-parser")
 const dotenv = require("dotenv");
+
 const connectDataBase = require("./config/database")
 const errorMiddleware = require("./middlewares/errors")
 const ErrorHandler = require("./utils/errorHandler")
@@ -29,6 +31,9 @@ connectDataBase()
 
 //Setting up the body parser
 app.use(express.json());
+
+//Setting cookie parser
+app.use(cookieParser());
 
 
 

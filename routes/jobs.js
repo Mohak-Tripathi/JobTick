@@ -9,16 +9,18 @@ const router= express.Router();
 // import jobController 
 const {getJobs, newJob, getJobsInRadius, updateJob, deleteJob, getJob, jobStats}= require('../controllers/jobsController')
 
+const {isAuthenticated}= require('../middlewares/auth')
+
 router.route('/jobs').get(getJobs);
 router.route("/job/:id/:slug").get(getJob);
 router.route("/stats/:topic").get(jobStats);
 router.route("/jobs/:zipcode/:distance").get(getJobsInRadius)
 
-router.route("/job/new").post(newJob)
+router.route("/job/new").post(isAuthenticated, newJob) //now protected route
 
 
 // get and delete methods are in same as route is same
-router.route("/job/:id").put(updateJob).delete(deleteJob)
+router.route("/job/:id").put(isAuthenticated, updateJob).delete(isAuthenticated, deleteJob)
 
 
 
