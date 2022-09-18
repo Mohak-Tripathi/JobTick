@@ -49,4 +49,12 @@ userSchema.methods.getJwtToken = function () {
   });
 };
 
+//Compare user password in database password. 
+
+userSchema.methods.comparePassword = async function(enterPassword){ // password user wrote
+
+    return await bcrypt.compare(enterPassword, this.password) // this.password is that password which is stored in DB.
+//this function return true OR false only
+}
+
 module.exports = mongoose.model("User", userSchema);

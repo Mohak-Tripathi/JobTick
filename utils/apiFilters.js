@@ -17,6 +17,8 @@ class APIFilters {
       const queryCopy = { ...this.queryStr }; // if more then one filter i think therefore, we made copy
   
     //   Removing fields from the query -
+      const removeFields = ['sort', 'fields', 'q', 'limit', 'page'];
+      removeFields.forEach(el => delete queryCopy[el]);
   
      
       console.log(queryCopy);
