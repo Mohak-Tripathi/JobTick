@@ -18,8 +18,7 @@ class APIFilters {
   
     //   Removing fields from the query -
   
-      const removeFields = ["sort","fields", "q"];
-      removeFields.forEach(el => delete queryCopy[el]);
+     
       console.log(queryCopy);
   
       // Advance filter using : lt, lte, gt, gte, in

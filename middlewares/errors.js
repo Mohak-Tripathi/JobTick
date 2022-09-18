@@ -36,7 +36,13 @@ module.exports = (err, req, res, next) => {
       const message = Object.values(err.errors).map(value => value.message)
       error = new ErrorHandler(message, 400)
     }
-console.log(error, "mohak")
+
+    //Handle mongoose duplicate key error- 
+    if(err.code === 11000){
+      const message = `Duplicate ${Object.keys(err.keyValue)} entered.` //Object.keys is used as there can be multiple duplicate errors. 
+    error= new ErrorHandler(message, 400)
+    }
+
 
     return res.status(error.statusCode).json({
       success: false,
