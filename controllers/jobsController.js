@@ -4,10 +4,21 @@ const geoCoder = require("../utils/geocoder");
 
 const ErrorHandler = require("../utils/errorHandler")
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors")
+const APIFilters = require("../utils/apiFilters");
 
 //GET ALL JOBS=> /api/v1/jobs
-exports.getJobs = catchAsyncErrors( async (req, res, next) => {
-  const jobs = await Job.find({}).lean().exec();
+exports.getJobs = catchAsyncErrors(async (req, res, next) => {
+  const apiFilters = new APIFilters(Job.find(), req.query) //   const apiFilters = new APIFilters(Job, req.query) => Job.find() and only Job both will work and only "Job" is making more sense here.
+  //now you can do -
+  .filter() // similar to apiFilters.filter()
+  .sort()  // similar to apiFilters.sort()
+ .limitFields()  // similar to apiFilters.limitFields()
+ .searchByQuery()  // similar to apiFilters.searchByQuery()
+ .pagination()  // similar to apiFilters.pagination()
+
+  // const jobs = await Job.find({}).lean().exec();
+
+  const jobs = await apiFilters.query;  // Why we added ".query" here?
 
   res.status(200).json({
     success: true,
