@@ -83,3 +83,32 @@ sendToken(user, 200, res);
 
 
 });
+
+//Forgot Password.  => api/v1/password/forgot
+
+exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
+
+  const user = await User.findOne({email : req.body.email}); 
+
+  //Check user email in DB.
+  
+  if(!user){
+    return next(new ErrorHandler("No user with this email.", 404 ))
+  }
+
+  //Get reset token.
+  
+  const resetToken = user.getResetPasswordToken(); 
+
+  //save the user 
+  //save the token in user model. 
+  await user.save({ validateBeforeSave : false}); // we do not want to validate now. 
+
+//create reset password url. 
+
+const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/password/reset/${resetToken}`;
+// Here, protocol : http/ https and "host" : localhost or anyother host 
+
+const message = `Your password reset link is as follows:\n\n${resetUrl}\n\n If you have not request the same, kindly ignore and report to us.`
+
+})

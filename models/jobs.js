@@ -122,6 +122,11 @@ const jobSchema = new mongoose.Schema(
       type: [Object], // Object because we want to store id and resume.
       select: false, // esse normal users can't see this
     },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: true
+    }
   },
   {
     versionKey: false,

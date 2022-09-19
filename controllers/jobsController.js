@@ -42,6 +42,17 @@ exports.getJobs = catchAsyncErrors(async (req, res, next) => {
 exports.newJob = catchAsyncErrors( async (req, res, next) => {
   //   console.log(req.body);
 
+
+  //Adding user to body.
+req.body.user = req.user.id;
+
+//req.user holds the currently logged in user data.
+// So, req.user.id will give the current user ID. 
+//We just assign this id to req.body and saving that in the database.
+//In the jobs model, we have also specified that we have to save the user ID.
+//And req.user data is coming from the auth.js middleware. 
+
+
   const job = await Job.create(req.body);
 
   res.status(200).json({

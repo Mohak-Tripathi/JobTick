@@ -57,4 +57,25 @@ userSchema.methods.comparePassword = async function(enterPassword){ // password 
 //this function return true OR false only
 }
 
+//Generate Password Reset Token. 
+userSchema.methods.getResetPasswordToken = function() {
+  //Generate token 
+  const resetToken = crypto.randomBytes(20).toString('hex'); // it will create 20 byte random string which we are changing in hex. 
+
+//Hash and set to resetPasswordToken (our one field in model)
+// Hashing for security reasons;
+
+//sha256 algorithm name
+this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest("hex")
+
+// Set Token expire time (our one field in model)
+
+this.resetPasswordExpire = Date.now() + 30*60*1000 // in 30 mint password will expire. 
+
+return resetToken; //we are sending(return) normal token to email and not hashed version.
+// Hashed version is just we are storing in DB. 
+
+}
+
+
 module.exports = mongoose.model("User", userSchema);

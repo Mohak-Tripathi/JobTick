@@ -43,3 +43,6 @@ exports.authorizeRoles = (...roles) => {  //we are passing the roles to the auth
   }
 }
 
+//Internal function will act as middleware function, the outer function will act as the wrapper.
+
+//In the outer function, we pass our roles and in the middleware function, we have access to the req, res, next in which we can validate the user role and return the error message if role doesn't matches.
