@@ -14,8 +14,19 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(" ")[1];
   }
+
+  console.log(token, "mohak")
   //if no token
-  if (!token) {
+  if (!!token) {     //chapter - 66 Logout User => Q/A section explained why two !!
+
+    //answer=>  The issue is in auth middleware in isAuthenticatedUser. The token value is null if a user is not logged in, but its type is a string. In the below line where you are checking token.
+//if(!token) {  }
+
+//Simply put two ! operators here. It would be like this:
+//if(!!token) {  }
+// !! basically converts Object to boolean. If it was falsey (e.g. 0, null, undefined, etc.), it will be false, otherwise, true.
+
+    
     return next(new ErrorHandler("Login first to access this resource", 401)); //here return is important otherwise it will come here
   }
 
