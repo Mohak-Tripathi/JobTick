@@ -29,3 +29,17 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
   next(); // this is the end so no need to add return. Nothing is there after that.
 });
+
+
+//Handling users roles. 
+
+exports.authorizeRoles = (...roles) => {  //we are passing the roles to the authorization from "routes" - Only admin and employer are allowed. 
+  return (req, res, next) =>{
+
+    if(!roles.includes(req.user.role)){
+      return next(new ErrorHandler(`Role (${req.user.role}) is not allowed to access this resource`, 403))
+    }
+    next()
+  }
+}
+
