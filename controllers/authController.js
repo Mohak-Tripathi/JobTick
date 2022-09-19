@@ -4,6 +4,8 @@ const ErrorHandler = require("../utils/errorHandler");
 const sendToken = require("../utils/jwtToken");
 
 const sendEmail = require("../utils/sendEmail")
+const crypto = require("crypto");  //built in crypto module
+
 
 //Register a new user => /api/v1/register
 
@@ -132,3 +134,37 @@ console.log(error)
     return next(new ErrorHandler("Email is not sent", 500));
   }
 });
+
+
+//Reset Password =>  /api/v1/password/reset/:token
+
+exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
+  //Hash url token . We need to hash the token which we are getting from route. And then comapring it with DB stored hashed token.
+
+  const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+  const user = await User.findOne({ 
+    resetPasswordToken,
+    resetPasswordExpire : {$gt: Date.now()} // if not the case. It means token expires. 30 minutes lapsed. Not allowed now to change or reset. 
+  })
+
+  if(!user){
+    return next(new ErrorHandler("Password reset token is invalid"));
+  }
+
+  //Setup new Password. 
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined; // becz now job is done. 
+  user.resetPasswordExpire = undefined; // becz now job is done. 
+
+  //save the user password. 
+
+  await user.save();
+
+  //assign the new token as the user recovered his password. 
+
+  sendToken(user, 200, res);
+
+
+})
