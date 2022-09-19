@@ -13,18 +13,19 @@ const sendEmail = async options => {
         }
     })
 
+
+   
+
     //create message which needs to send. 
 
     const message = {
 
-        from : `${process.env.SMTP_FROM_NAME} <${process.env.SMTP_FROM}>`,
-
-        //to, subject, text are coming from controller
+        from : `${process.env.SMTP_FROM_NAME} <${process.env.SMTP_FROM_EMAIL}>`,  
         to: options.email, 
         subject : options.subject,
         text : options.message
 
-
+  //to, subject, text are coming from controller
     }
 //send email to user
     await transporter.sendMail(message); 

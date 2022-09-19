@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const  jwt = require("jsonwebtoken")
+const crypto = require("crypto") //inbuilt
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -38,6 +39,11 @@ const userSchema = new mongoose.Schema({
 
 //Encypting password before saving it
 userSchema.pre("save", async function (next) {
+
+  if(!this.isModified("password")){
+    next()
+  }
+
   //so that "this" can be used
   this.password = await bcrypt.hash(this.password, 10); //saltvalue is 10
 });

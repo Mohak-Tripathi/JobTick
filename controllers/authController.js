@@ -1,22 +1,20 @@
-
 const User = require("../models/users");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../utils/errorHandler");
-const sendToken= require("../utils/jwtToken")
+const sendToken = require("../utils/jwtToken");
+
+const sendEmail = require("../utils/sendEmail")
 
 //Register a new user => /api/v1/register
 
-
-
-// Que- We are creating jwttoken both times while registering user and also when user is login. 
-//I believe we use only jwt token which we create during login for various purposes. 
+// Que- We are creating jwttoken both times while registering user and also when user is login.
+//I believe we use only jwt token which we create during login for various purposes.
 //So kindly put some light on it why we create jwt token in both scenario?
 
-//Ans- In some cases, the user registers the account and can use his/her account directly without logging in again, 
+//Ans- In some cases, the user registers the account and can use his/her account directly without logging in again,
 //in that case, we need JWT to authenticate the user and that is the reason we are creating JWT in the register user as well.
 
 //If you don't want this, then you can create a token only in login. It is also fine.
-
 
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
   const { name, email, password, role } = req.body;
@@ -24,19 +22,18 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
   const user = await User.create({ name, email, password, role });
 
   //Create JWT token
-//   const token = user.getJwtToken();
+  //   const token = user.getJwtToken();
 
-//   res.status(200).json({
-//     suceess: true,
-//     message: "Successfully registered",
+  //   res.status(200).json({
+  //     suceess: true,
+  //     message: "Successfully registered",
 
-//     // data: user
-//     token,
-//   });
+  //     // data: user
+  //     token,
+  //   });
 
-//JWT Token and res.status(...) => this is removed now and replaced with- 
-sendToken(user, 200, res);
-
+  //JWT Token and res.status(...) => this is removed now and replaced with-
+  sendToken(user, 200, res);
 });
 
 //Login user => /api/v1/login
@@ -70,45 +67,68 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 
   // Create JSON Web Token-
 
-//   const token = user.getJwtToken();
+  //   const token = user.getJwtToken();
 
-//   res.status(200).json({
-//     success: true,
-//     token,
-//   });
+  //   res.status(200).json({
+  //     success: true,
+  //     token,
+  //   });
 
-
-//JWT Token and res.status(...) => this is removed now and replaced with- 
-sendToken(user, 200, res);
-
-
+  //JWT Token and res.status(...) => this is removed now and replaced with-
+  sendToken(user, 200, res);
 });
 
 //Forgot Password.  => api/v1/password/forgot
 
 exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
-
-  const user = await User.findOne({email : req.body.email}); 
+  const user = await User.findOne({ email: req.body.email });
 
   //Check user email in DB.
-  
-  if(!user){
-    return next(new ErrorHandler("No user with this email.", 404 ))
+
+  if (!user) {
+    return next(new ErrorHandler("No user with this email.", 404));
   }
 
   //Get reset token.
-  
-  const resetToken = user.getResetPasswordToken(); 
 
-  //save the user 
-  //save the token in user model. 
-  await user.save({ validateBeforeSave : false}); // we do not want to validate now. 
+  const resetToken = user.getResetPasswordToken();
+// console.log(resetToken, "12345");
 
-//create reset password url. 
+  //save the user
+  //save the token in DB.
+  await user.save({ validateBeforeSave: false }); // we do not want to validate now.
 
-const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/password/reset/${resetToken}`;
-// Here, protocol : http/ https and "host" : localhost or anyother host 
+  //create reset password url.
 
-const message = `Your password reset link is as follows:\n\n${resetUrl}\n\n If you have not request the same, kindly ignore and report to us.`
+  const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+  // Here, protocol : http/ https and "host" : localhost or anyother host
 
-})
+  // console.log(resetUrl, "xyz")
+
+  const message = `Your password reset link is as follows:\n\n${resetUrl}\n\n If you have not request the same, kindly ignore and report to us.`;
+
+
+  // putting in try catch to cover error while sending email. 
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Jobbee-API Password Recovery",
+      message,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent successfully to ${user.email}`,
+    });
+  } catch (error) {
+    // if error, we want to make it undefined in DB. Means we are not saving in DB. 
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+console.log(error)
+    //saving those empty values in DB.
+    await user.save({ validateBeforeSave: false });
+
+    return next(new ErrorHandler("Email is not sent", 500));
+  }
+});
