@@ -3,6 +3,7 @@ const app = express();
 
 const cookieParser = require("cookie-parser")
 const dotenv = require("dotenv");
+const fileUpload = require("express-fileupload")
 
 const connectDataBase = require("./config/database")
 const errorMiddleware = require("./middlewares/errors")
@@ -20,7 +21,7 @@ dotenv.config({ path: "./config/config.env" });
 //console.log(kdsdlskdslkdls)  -- this is uncaught exception. So if this comes before. Then we can't catch but if comes after then we can so put as above as possible. 
 
 process.on("uncaughtException", err =>{
-  console.log(`ERROR: ${err.message}`);
+  console.log(`ERROR: ${err.stack}`);
   console.log(`Shutting down due to uncaught exception`);
   process.exit(1);   // in this case we don't need to close the server. Just need to come out (exit) from the process.
 })
@@ -35,7 +36,8 @@ app.use(express.json());
 //Setting cookie parser
 app.use(cookieParser());
 
-
+//Handle file upload.
+app.use(fileUpload()); 
 
 
 

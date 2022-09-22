@@ -7,7 +7,7 @@ const router= express.Router();
 
 
 // import jobController 
-const {getJobs, newJob, getJobsInRadius, updateJob, deleteJob, getJob, jobStats}= require('../controllers/jobsController')
+const {getJobs, newJob, getJobsInRadius, updateJob, deleteJob, getJob, jobStats, applyJob}= require('../controllers/jobsController')
 
 const {isAuthenticated, authorizeRoles}= require('../middlewares/auth')
 
@@ -17,6 +17,8 @@ router.route("/stats/:topic").get(jobStats);
 router.route("/jobs/:zipcode/:distance").get(getJobsInRadius)
 
 router.route("/job/new").post(isAuthenticated, authorizeRoles("employer", "admin"), newJob) //now protected route
+
+router.route("/job/:id/apply").put(isAuthenticated, authorizeRoles("user"), applyJob) // only user can apply for job
 
 //Note= authentication and authorization order matter a lot. Because in isAuthenticated only => we are attaching "req.user" 
 //and also authentication happends before authorization. 
