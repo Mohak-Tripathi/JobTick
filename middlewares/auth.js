@@ -17,7 +17,7 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
   console.log(token, "mohak")
   //if no token
-  if (!!token) {     //chapter - 66 Logout User => Q/A section explained why two !!
+  if (!token) {     //chapter - 66 Logout User => Q/A section explained why two !!
 
     //answer=>  The issue is in auth middleware in isAuthenticatedUser. The token value is null if a user is not logged in, but its type is a string. In the below line where you are checking token.
 //if(!token) {  }
@@ -34,7 +34,8 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET); //jwt algorithm will compare. If true then good. We will access "id". We added users "_id" in payload data as first parameter.
 
-  console.log(decoded, "hihi");
+  // console.log(decoded, "hihi");
+
   console.log(decoded.id);
   req.user = await User.findById(decoded.id); // here we are attaching "user" in req object and sending forward. Now we can access=> req.user anywhere. 
 
