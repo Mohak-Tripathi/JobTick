@@ -118,6 +118,7 @@ const jobSchema = new mongoose.Schema(
     },
 
     //we also want to store the applications applied. We will store their id and resume of those applications.
+  //should be applicantsApplied but written wrongly and used wrongly
     applicationsApplied: {
       type: [Object], // Object because we want to store id and resume.
       select: false, // esse normal users can't see this

@@ -231,83 +231,89 @@ exports.getJobsInRadius = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-//Apply to job using Resume => /api/v1/job/:id/apply.
-
+// Apply to job using Resume  =>  /api/v1/job/:id/apply
 exports.applyJob = catchAsyncErrors(async (req, res, next) => {
-  let job = await Job.findById(req.params.id);
+  let job = await Job.findById(req.params.id).select("+applicationsApplied"); // same logic as password. In model it is select false, so use this way, becz i need to use under subheading =>  "//Check if user has applied before"
 
   if (!job) {
-    return next(new ErrorHandler("Job not found", 404));
+    return next(new ErrorHandler("Job not found.", 404));
   }
 
-  //Check that if job last date has been passed or not.
-
+  // Check that if job last date has been passed or not
   if (job.lastDate < new Date(Date.now())) {
     return next(
-      new ErrorHandler("You cannot apply to this job. Date is over, 400 ")
+      new ErrorHandler("You can not apply to this job. Date is over.", 400)
     );
   }
 
-  //Check the files.
-  //We have middleware applied in app.js. That is how we check and get file here.
+  //Check if user has applied before
+
+  for (let i = 0; i < job.applicationsApplied.length; i++) {
+      if (job.applicationsApplied[i].id === req.user.id) {
+          return next(new ErrorHandler('You have already applied for this job.', 400))
+      }
+  }
+
+  // Check the files
+  //   //We have middleware applied in app.js. That is how we check and get file here.
+
+  //We have installed express-fileupload package.
+//That package will help us to access files from req.files
+//Files are sent with the request and we get our data from req.body
+
   if (!req.files) {
-    return next(new ErrorHandler("Please upload files", 400));
+    return next(new ErrorHandler("Please upload file.", 400));
   }
 
   const file = req.files.file;
 
-  // Check file type.
-  const supportedFiles = /.docs|.pdf/;
+  // Check file type
+  const supportedFiles = /.docx|.pdf/;
 
   //use test() method
   if (!supportedFiles.test(path.extname(file.name))) {
-    return next(new ErrorHandler("Please upload pdf or doc file", 400));
+    return next(new ErrorHandler("Please upload document file.", 400));
   }
 
-  // Check document size.
-  if (file.size > process.env.Max_File_Size) {
-    return next(
-      new ErrorHandler("Document size should be less than 2MB.", 400)
-    );
+  // Check doucument size
+  if (file.size > process.env.MAX_FILE_SIZE) {
+    return next(new ErrorHandler("Please upload file less than 2MB.", 400));
   }
 
   //Renaming resume=> Aim is to make it unique. So replacing user name space(" ") with underscore. then adding jobid then file name with its extension.
-
   file.name = `${req.user.name.replace(" ", "_")}_${job._id}${
     path.parse(file.name).ext
   }`;
-});
-
-//mv method is used to move the files
-
-file.mv(`${process.env.UPLOAD_PATH}/${file.name}`, async (err) => {
-  if (err) {
-    console.log(err);
-    return next(new ErrorHandler("Resume Upload failed", 500));
-  }
-
-  //file if moved. We are just storing details in "applicantsApplied" field. (not file itself. Just recheck)
-  await Job.findByIdAndUpdate(
-    req.params.id,
-    {
-      //job model has applicantsApplied field. which is array to object. So push object inside array.
-      $push: {
-        applicantsApplied: {
-          id: req.user.id,
-          resume: file.name,
-        }, //original files will be stored in file system separetly.
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false,
+  //mv method is used to move the files
+  file.mv(`${process.env.UPLOAD_PATH}/${file.name}`, async (err) => {
+    if (err) {
+      console.log(err);
+      return next(new ErrorHandler("Resume upload failed.", 500));
     }
-  );
-});
+    //file if moved. We are just storing details in "applicationsApplied" field. (not file itself. Just recheck)
+    await Job.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          //job model has applicationsApplied field. which is array to object. So push object inside array.
+          
+          applicationsApplied: {
+            id: req.user.id,
+            resume: file.name,
+          }, //original files will be stored in file system separetly.
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false,
+      }
+    );
 
-res.status(200).json({
-  sucess: true,
-  message: "Applied to job successfully",
-  data: file.name,
+    res.status(200).json({
+      success: true,
+      message: "Applied to Job successfully.",
+      data: file.name,
+    });
+  });
 });
