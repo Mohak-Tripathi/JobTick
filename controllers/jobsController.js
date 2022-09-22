@@ -231,11 +231,6 @@ exports.getJobsInRadius = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
-
-
-
-
 //Apply to job using Resume => /api/v1/job/:id/apply.
 
 exports.applyJob = catchAsyncErrors(async (req, res, next) => {
@@ -285,36 +280,34 @@ exports.applyJob = catchAsyncErrors(async (req, res, next) => {
 
 //mv method is used to move the files
 
-  file.mv(`${process.env.UPLOAD_PATH}/${file.name}`, async (err) => {
+file.mv(`${process.env.UPLOAD_PATH}/${file.name}`, async (err) => {
   if (err) {
     console.log(err);
     return next(new ErrorHandler("Resume Upload failed", 500));
   }
-});
 
-//file if moved. We are just storing details in "applicantsApplied" field. (not file itself. Just recheck)
-await Job.findByIdAndUpdate(
-  req.params.id,
-  {
-    //job model has applicantsApplied field. which is array to object. So push object inside array.
-    $push: {
-      applicantsApplied: {  
-        id: req.user.id,
-        resume: file.name,
-      },    //original files will be stored in file system separetly. 
+  //file if moved. We are just storing details in "applicantsApplied" field. (not file itself. Just recheck)
+  await Job.findByIdAndUpdate(
+    req.params.id,
+    {
+      //job model has applicantsApplied field. which is array to object. So push object inside array.
+      $push: {
+        applicantsApplied: {
+          id: req.user.id,
+          resume: file.name,
+        }, //original files will be stored in file system separetly.
+      },
     },
-  },
-  {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  }
-);
-
-
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+});
 
 res.status(200).json({
   sucess: true,
   message: "Applied to job successfully",
-  data: file.name
-})
+  data: file.name,
+});
