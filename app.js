@@ -103,7 +103,7 @@ const server = app.listen(3000, () => {
 
 process.on("unhandledRejection", err =>{
 
-  console.log(`Error: ${err.message}`);
+  console.log(`Error: ${err.stack}`);
   console.log(`Shutting down server due to unhandled promise rejection`);
 
   server.close(()=>{

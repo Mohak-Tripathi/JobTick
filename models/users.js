@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+}, { 
+  toJSON : {virtuals : true},
+  toObject : {virtuals : true},
+
+
 });
 
 //Encypting password before saving it
@@ -82,6 +87,22 @@ return resetToken; //we are sending(return) normal token to email and not hashed
 // Hashed version is just we are storing in DB. 
 
 }
+
+
+// Show all the jobs created by user using virtuals. It won't be store in database actually. 
+
+userSchema.virtual("jobPublished", {  //jobPublished is just field name. Could be anything.
+  ref : "Job", 
+  localField : "_id", 
+  foreignField : "user", // where the job is published
+  justOne : false, 
+})
+
+//The ref option, which tells Mongoose which model to populate documents from.
+//The localField and foreignField options. Mongoose will populate documents from the model in ref whose foreignField matches this document's localField.
+//And after that we have used populate() to populate that virtual field.
+
+
 
 
 module.exports = mongoose.model("User", userSchema);
