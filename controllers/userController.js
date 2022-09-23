@@ -6,6 +6,8 @@ const ErrorHandler = require("../utils/errorHandler");
 const sendToken = require("../utils/jwtToken");
 const fs = require("fs");
 
+const APIFilters = require('../utils/apiFilters');
+
 //Get current user profile => /api/v1/me
 
 exports.getUserProfile = catchAsyncErrors(async (req, res, next) => {
@@ -123,13 +125,14 @@ async function deleteUserData(userId, role) {
 
     for (let i = 0; i < appliedJobs.length; i++) {
       let obj = appliedJobs[i].applicationsApplied.find((o) => o.id === userId);
+console.log(obj, "obj")
 
       console.log(__dirname);
 
       let filepath = `${__dirname}/public/uploads/${obj.resume}`.replace(
         `\\controllers`,
         " "
-      );
+      );  //check the commentary. Basically making path right
 
       fs.unlink(filepath, (err) => {
         if (err) return console.log(err);
@@ -144,3 +147,49 @@ async function deleteUserData(userId, role) {
     }
   }
 }
+
+
+
+
+
+
+
+// Adding controller methods that only accessible by admins
+
+// Show all users  =>   /api/v1/users
+exports.getUsers = catchAsyncErrors( async (req, res, next) => {
+    const apiFilters = new APIFilters(User.find(), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .pagination();
+        // not added search by query method. 
+  
+    const users = await apiFilters.query; // .query method didn't understand. 
+  
+    res.status(200).json({
+        success : true,
+        results : users.length,
+        data : users
+    })
+  });
+  
+
+
+  // Delete User(Admin)   =>   /api/v1/user/:id
+exports.deleteUserAdmin = catchAsyncErrors( async (req, res, next) => {
+    const user = await User.findById(req.params.id); // this time get id from parameter as admin is requesting and req.user is for normal user which is getting attached while authentication. 
+
+    if(!user) {
+        return next(new ErrorHandler(`User not found with id: ${req.params.id}`, 404));
+    }
+
+    deleteUserData(user.id, user.role);// function call => 
+    await user.remove(); // remove user from DB
+
+    res.status(200).json({
+        success : true,
+        message : 'User is deleted by Admin.'
+    });
+
+});

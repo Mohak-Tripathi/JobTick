@@ -15,7 +15,7 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
 
-  console.log(token, "mohak")
+  // console.log(token, "mohak")
   //if no token
   if (!token) {     //chapter - 66 Logout User => Q/A section explained why two !!
 
@@ -36,7 +36,7 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
   // console.log(decoded, "hihi");
 
-  console.log(decoded.id);
+  // console.log(decoded.id);
   req.user = await User.findById(decoded.id); // here we are attaching "user" in req object and sending forward. Now we can access=> req.user anywhere. 
 
   next(); // this is the end so no need to add return. Nothing is there after that.
