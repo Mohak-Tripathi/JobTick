@@ -123,7 +123,6 @@ exports.deleteJob = catchAsyncErrors(async (req, res, next) => {
     //   success: false,
     //   message: "Job not found",
     // });
-
     return next(new ErrorHandler("Job not found", 404));
   }
 

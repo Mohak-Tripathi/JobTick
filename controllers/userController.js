@@ -145,7 +145,7 @@ console.log(obj, "obj")
         1
       );
 
-      appliedJobs[i].save(); //save job automatically
+     await appliedJobs[i].save(); //save job automatically
     }
   }
 }

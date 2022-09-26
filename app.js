@@ -4,6 +4,12 @@ const app = express();
 const cookieParser = require("cookie-parser")
 const dotenv = require("dotenv");
 const fileUpload = require("express-fileupload")
+const rateLimit = require("express-rate-limit")
+const helmet = require("helmet")
+const mongoSanitize = require('express-mongo-sanitize');
+const xssClean = require('xss-clean')
+const hpp = require("hpp")
+const cors = require('cors')
 
 const connectDataBase = require("./config/database")
 const errorMiddleware = require("./middlewares/errors")
@@ -26,9 +32,14 @@ process.on("uncaughtException", err =>{
   process.exit(1);   // in this case we don't need to close the server. Just need to come out (exit) from the process.
 })
 
-
 // connecting database 
 connectDataBase()
+
+//Set up Security headers => Use Helmet
+
+app.use(helmet()) //for increasing security. 
+
+
 
 //Setting up the body parser
 app.use(express.json());
@@ -38,6 +49,28 @@ app.use(cookieParser());
 
 //Handle file upload.
 app.use(fileUpload()); 
+
+//Sanitize data
+app.use(mongoSanitize());
+
+//Prevent xss attacks
+app.use(xssClean());
+
+//Prevent Parameter Pollution
+app.use(hpp({
+  whitelist: ["positions"]
+}))
+
+//Set CORS => Accesible by other domains.
+app.use(cors());
+
+//Rate Limiting
+const limiter = rateLimit({
+  windowMs : 10*60*1000, //10Minutes
+max: 100
+});
+
+app.use(limiter);
 
 
 
