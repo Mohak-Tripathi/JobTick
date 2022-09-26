@@ -6,6 +6,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const APIFilters = require("../utils/apiFilters");
 const path = require("path");
+const fs = require("fs");
 
 //GET ALL JOBS=> /api/v1/jobs
 exports.getJobs = catchAsyncErrors(async (req, res, next) => {
@@ -88,6 +89,15 @@ exports.updateJob = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Job not found", 404));
   }
 
+  //Check if the user is owner.
+  if (job.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorHandler(
+        `User (${req.user.id}) is not owner of this job so not allowed to change this job. `
+      )
+    );
+  }
+
   job = await Job.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
@@ -104,7 +114,7 @@ exports.updateJob = catchAsyncErrors(async (req, res, next) => {
 
 //Someone asked good question- Chapter 37 - Regarding job update
 exports.deleteJob = catchAsyncErrors(async (req, res, next) => {
-  let job = await Job.findById(req.params.id);
+  let job = await Job.findById(req.params.id).select('+applicationsApplied');
 
   if (!job) {
     // return se immediately, it will come out from function
@@ -115,6 +125,29 @@ exports.deleteJob = catchAsyncErrors(async (req, res, next) => {
     // });
 
     return next(new ErrorHandler("Job not found", 404));
+  }
+
+  //Check if the user is owner.
+  if (job.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorHandler(
+        `User (${req.user.id}) is not owner of this job so not allowed to delete this job. `
+      )
+    );
+  }
+
+  // Deleting files associated with job
+
+  for (let i = 0; i < job.applicationsApplied.length; i++) {
+    let filepath =
+      `${__dirname}/public/uploads/${job.applicationsApplied[i].resume}`.replace(
+        "\\controllers",
+        ""
+      );
+
+    fs.unlink(filepath, (err) => {
+      if (err) return console.log(err);
+    });
   }
 
   //Job.remove(); will also woek
@@ -134,6 +167,9 @@ exports.getJob = catchAsyncErrors(async function (req, res, next) {
 
   let job = await Job.find({
     $and: [{ _id: req.params.id }, { slug: req.params.slug }],
+  }).populate({
+    path: "user",
+    select: "name",
   });
 
   if (!job || job.length === 0) {
@@ -249,17 +285,19 @@ exports.applyJob = catchAsyncErrors(async (req, res, next) => {
   //Check if user has applied before
 
   for (let i = 0; i < job.applicationsApplied.length; i++) {
-      if (job.applicationsApplied[i].id === req.user.id) {
-          return next(new ErrorHandler('You have already applied for this job.', 400))
-      }
+    if (job.applicationsApplied[i].id === req.user.id) {
+      return next(
+        new ErrorHandler("You have already applied for this job.", 400)
+      );
+    }
   }
 
   // Check the files
   //   //We have middleware applied in app.js. That is how we check and get file here.
 
   //We have installed express-fileupload package.
-//That package will help us to access files from req.files
-//Files are sent with the request and we get our data from req.body
+  //That package will help us to access files from req.files
+  //Files are sent with the request and we get our data from req.body
 
   if (!req.files) {
     return next(new ErrorHandler("Please upload file.", 400));
@@ -296,7 +334,7 @@ exports.applyJob = catchAsyncErrors(async (req, res, next) => {
       {
         $push: {
           //job model has applicationsApplied field. which is array to object. So push object inside array.
-          
+
           applicationsApplied: {
             id: req.user.id,
             resume: file.name,
@@ -317,7 +355,3 @@ exports.applyJob = catchAsyncErrors(async (req, res, next) => {
     });
   });
 });
-
-
-
-

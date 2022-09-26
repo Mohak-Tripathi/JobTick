@@ -106,6 +106,8 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+
+// delete jobs and resume files with this function.
 async function deleteUserData(userId, role) {
   if (role === "employer") {
     //then only delete the jobs which he created (published). If he is gone so what the point. So those jobs where his id reference is there => delete those.
@@ -119,7 +121,7 @@ async function deleteUserData(userId, role) {
       "applicationsApplied.id": userId,
     }).select("+applicationsApplied");
 
-    console.log(appliedJobs);
+    // console.log(appliedJobs, "apapapa");
 
     //now delete those jobs
 
@@ -131,7 +133,7 @@ console.log(obj, "obj")
 
       let filepath = `${__dirname}/public/uploads/${obj.resume}`.replace(
         `\\controllers`,
-        " "
+        ""
       );  //check the commentary. Basically making path right
 
       fs.unlink(filepath, (err) => {
@@ -183,6 +185,8 @@ exports.deleteUserAdmin = catchAsyncErrors( async (req, res, next) => {
     if(!user) {
         return next(new ErrorHandler(`User not found with id: ${req.params.id}`, 404));
     }
+
+    console.log(user, user.id, "check")
 
     deleteUserData(user.id, user.role);// function call => 
     await user.remove(); // remove user from DB
