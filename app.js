@@ -121,15 +121,25 @@ app.all("*", function(req, res, next){
 
 //Middleware to handle errors- --------
 // this middleware should be at the bottom.
+//Global error handling middleware 
+
+// The code starts in jobsController.js, which contains your route handlers and business logic for handling job-related requests. When an error occurs in one of these route handlers, you create an error object using new ErrorHandler("Job not found", 404).
+// From jobsController.js, the error object is passed to the Express.js application defined in app.js. This happens implicitly when you call next(errorObject).
+// In app.js, you've configured your Express application to use the errorMiddleware as global error handling middleware with app.use(errorMiddleware);. This middleware is defined in error.js.
+// When an error occurs and reaches app.use(errorMiddleware);, it's processed by the errorMiddleware function defined in error.js. This middleware inspects the error object, checks the environment, and constructs an appropriate error response based on the error properties and the environment.
+// Finally, the errorMiddleware sends the error response to the client with the correct status code and error message, completing the error handling process.
+// So, the flow of error handling starts in the route handlers (e.g., jobsController.js), propagates through the Express application (app.js), and is ultimately processed and responded to by the errorMiddleware defined in error.js. This is a typical pattern for handling errors in an Express.js application.
+
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
 
-const server = app.listen(3000, () => {
+const server = app.listen(8080, () => {
   console.log(
     `Server is listening at port ${process.env.PORT} in ${process.env.NODE_ENV} mode`
   );
 });
+
 
 
 //Handling Unhandled Promise Rejection 

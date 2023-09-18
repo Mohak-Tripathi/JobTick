@@ -85,8 +85,9 @@ exports.updateJob = catchAsyncErrors(async (req, res, next) => {
     //   success: false,
     //   message: "Job not Found",
     // });
-
-    return next(new ErrorHandler("Job not found", 404));
+    errorObject = new ErrorHandler("Job not found", 404)
+    console.log(errorObject)
+    return next(errorObject);
   }
 
   //Check if the user is owner.

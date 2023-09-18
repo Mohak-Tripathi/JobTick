@@ -16,7 +16,8 @@ router.route("/job/:id/:slug").get(getJob);
 router.route("/stats/:topic").get(jobStats);
 router.route("/jobs/:zipcode/:distance").get(getJobsInRadius)
 
-router.route("/job/new").post(isAuthenticated, authorizeRoles("employer", "admin"), newJob) //now protected route
+// isAuthenticated, authorizeRoles("employer", "admin")
+router.route("/job/new").post(newJob) //now protected route
 
 router.route("/job/:id/apply").put(isAuthenticated, authorizeRoles("user"), applyJob) // only user can apply for job
 
