@@ -22,6 +22,8 @@ module.exports = (err, req, res, next) => {
 
 // console.log(error, "papapapapap")
 
+
+// line error.message = err.message; is there to ensure that the error object always contains an error message, even if it doesn't match any specific error condition in the if blocks that follow.
     error.message = err.message;
 
     // Wrong Mongoose Object ID Error -

@@ -20,7 +20,7 @@ exports.getJobs = catchAsyncErrors(async (req, res, next) => {
 
   // const jobs = await Job.find({}).lean().exec();
 
-  const jobs = await apiFilters.query; // Why we added ".query" here?
+  const jobs = await apiFilters.query; // Why we added ".query" here? i know now- 
 
   res.status(200).json({
     success: true,
